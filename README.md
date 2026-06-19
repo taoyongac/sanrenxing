@@ -11,6 +11,8 @@ each with its premise, cost, and concrete next step. **You choose the path.**
 Provider-agnostic: every seat is just an OpenAI-compatible endpoint, so mix any
 models you like (OpenAI, DeepSeek, Moonshot/Kimi, a local vLLM/Ollama, …).
 
+**▶ Try it live:** **https://taolab.tail0ea5ac.ts.net/orchestra/** (hosted by Tao Lab)
+
 ![三人行 possibility map](docs/screenshot.png)
 
 <sub>*Illustrative example — three seats open distinct angles, the curator lays out branches A/B/C with premise, cost, and a concrete next step.*</sub>
@@ -134,6 +136,7 @@ and **AI-for-Science**. 三人行 is one of the lab's open tools for turning a h
 scientific question into a map of testable directions.
 
 🔗 **Lab site:** https://taolab.tail0ea5ac.ts.net/
+▶ **Live 三人行:** https://taolab.tail0ea5ac.ts.net/orchestra/
 
 ## License
 

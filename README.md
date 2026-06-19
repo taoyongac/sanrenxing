@@ -11,6 +11,10 @@ each with its premise, cost, and concrete next step. **You choose the path.**
 Provider-agnostic: every seat is just an OpenAI-compatible endpoint, so mix any
 models you like (OpenAI, DeepSeek, Moonshot/Kimi, a local vLLM/Ollama, …).
 
+![三人行 possibility map](docs/screenshot.png)
+
+<sub>*Illustrative example — three seats open distinct angles, the curator lays out branches A/B/C with premise, cost, and a concrete next step.*</sub>
+
 Ships in three forms:
 - **MCP server** — `trio_round` + `fanout` tools for any MCP host (Claude Code, etc.)
 - **Web demo** — a zero-framework single page with live streaming (`web/`)

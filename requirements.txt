@@ -1,0 +1,5 @@
+# Core: OpenAI-compatible client (works against any compatible endpoint).
+openai>=1.0
+
+# MCP server (only needed for mcp_server/server.py; the web demo is stdlib-only).
+mcp>=1.0

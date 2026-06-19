@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三人行 · sanrenxing</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --line:#272e3a; --ink:#e6edf3; --dim:#8b97a7;
+    --a:#7aa2f7; --b:#f7768e; --c:#9ece6a; --map:#e0af68; --accent:#7aa2f7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.65 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC",sans-serif}
+  header{padding:26px 20px 14px;text-align:center;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:30px;letter-spacing:.18em}
+  header .en{color:var(--dim);letter-spacing:.32em;font-size:12px;text-transform:uppercase}
+  header p{margin:10px auto 0;max-width:640px;color:var(--dim);font-size:13.5px}
+  main{max-width:860px;margin:0 auto;padding:20px}
+  .ask{display:flex;gap:10px;margin-bottom:18px}
+  .ask input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:13px 15px;font-size:15px;outline:none}
+  .ask input:focus{border-color:var(--accent)}
+  .ask button{background:var(--accent);color:#0b0f15;border:0;border-radius:10px;
+    padding:0 22px;font-size:15px;font-weight:600;cursor:pointer}
+  .ask button:disabled{opacity:.5;cursor:default}
+  .seats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .seat{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;min-height:96px}
+  .seat h3{margin:0 0 8px;font-size:13px;display:flex;align-items:center;gap:7px}
+  .seat .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .seat:nth-child(1) .dot{background:var(--a)} .seat:nth-child(2) .dot{background:var(--b)}
+  .seat:nth-child(3) .dot{background:var(--c)}
+  .seat .body{font-size:13.5px;color:#cdd6e2;white-space:pre-wrap}
+  .seat .tag{color:var(--dim);font-size:11px;font-weight:400;margin-left:auto}
+  .rounds-bar{color:var(--dim);font-size:12px;margin:4px 2px 14px}
+  .map{margin-top:8px}
+  .map .direct{background:#1b2230;border-left:3px solid var(--accent);padding:12px 14px;
+    border-radius:8px;margin-bottom:12px}
+  .map .overview{color:#cdd6e2;font-size:14px;margin-bottom:16px}
+  .branch{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:11px}
+  .branch .t{font-weight:600;color:var(--map);font-size:15px}
+  .branch .n{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;
+    border-radius:6px;background:var(--map);color:#0b0f15;font-weight:700;font-size:12px;margin-right:9px}
+  .branch .bridge{color:var(--accent);font-size:13px;margin:7px 0}
+  .branch .ins{font-size:13.5px;color:#cdd6e2}
+  .branch .nx{font-size:13px;color:var(--c);margin-top:7px}
+  .branch .meta{font-size:11.5px;color:var(--dim);margin-top:7px}
+  .note{color:var(--dim);font-size:12.5px;text-align:center;margin:10px 0}
+  .blink::after{content:"▍";animation:b 1s steps(2) infinite;color:var(--accent)}
+  @keyframes b{0%,50%{opacity:1}51%,100%{opacity:0}}
+  footer{border-top:1px solid var(--line);margin-top:34px;padding:20px;text-align:center;
+    color:var(--dim);font-size:12.5px;line-height:1.9}
+  footer a{color:var(--accent);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  @media(max-width:640px){.seats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>三 人 行</h1>
+  <div class="en">sanrenxing · divergent AI discussion</div>
+  <p>三个互补视角的 AI 同台发散，相互启发、彼此追问；最后绘出一张<strong>可能性地图</strong>，
+     由你来选路。不是投票决胜，是打开脑洞。</p>
+</header>
+<main>
+  <div class="ask">
+    <input id="q" placeholder="抛出一个值得探讨的科学 / 技术问题…" autofocus>
+    <button id="go">开始</button>
+  </div>
+  <div class="rounds-bar" id="rounds-bar"></div>
+  <div class="seats" id="seats"></div>
+  <div class="map" id="map"></div>
+  <div class="note" id="note"></div>
+</main>
+<footer>
+  <div><strong>Tao Lab</strong>, School of Life Sciences, Yunnan University · 云南大学 陶勇课题组</div>
+  <div>Epigenetics · Aging · Cancer · AI-for-Science —
+    <a href="https://taolab.tail0ea5ac.ts.net/" target="_blank" rel="noopener">taolab.tail0ea5ac.ts.net</a>
+  </div>
+  <div>三人行 is open source (MIT) ·
+    <a href="https://github.com/taoyongac/sanrenxing" target="_blank" rel="noopener">github.com/taoyongac/sanrenxing</a>
+  </div>
+</footer>
+<script>
+const $=s=>document.querySelector(s);
+const seatsEl=$("#seats"), mapEl=$("#map"), noteEl=$("#note"), barEl=$("#rounds-bar");
+const seatBox={}; // name -> {el, body}
+let es=null;
+
+function seatCard(name){
+  if(seatBox[name]) return seatBox[name];
+  const el=document.createElement("div"); el.className="seat";
+  el.innerHTML=`<h3><span class="dot"></span>${name}<span class="tag"></span></h3><div class="body"></div>`;
+  seatsEl.appendChild(el);
+  const o={el, body:el.querySelector(".body"), tag:el.querySelector(".tag")};
+  seatBox[name]=o; return o;
+}
+function reset(){
+  seatsEl.innerHTML=""; mapEl.innerHTML=""; noteEl.textContent=""; barEl.textContent="";
+  for(const k in seatBox) delete seatBox[k];
+}
+function branchCard(d){
+  const el=document.createElement("div"); el.className="branch";
+  el.innerHTML=`<div class="t"><span class="n">${d.n}</span>${d.title}</div>`+
+    (d.bridge?`<div class="bridge">↳ ${d.bridge}</div>`:"")+
+    `<div class="ins">${d.insight}</div>`+
+    (d.next?`<div class="nx">下一步 · ${d.next}</div>`:"")+
+    (d.meta?`<div class="meta">${d.meta}</div>`:"");
+  mapEl.appendChild(el);
+}
+
+function start(){
+  const q=$("#q").value.trim(); if(!q) return;
+  if(es) es.close();
+  reset(); $("#go").disabled=true; noteEl.textContent="讨论进行中…";
+  es=new EventSource("/api/ask?q="+encodeURIComponent(q));
+  es.addEventListener("round_start",e=>{barEl.textContent="第 "+JSON.parse(e.data).round+" 轮 · 多角度发散中";});
+  es.addEventListener("status",e=>{const d=JSON.parse(e.data); seatCard(d.agent).tag.textContent=d.text;});
+  es.addEventListener("delta",e=>{const d=JSON.parse(e.data); const c=seatCard(d.agent);
+    c.body.textContent+=d.text; c.body.classList.add("blink");});
+  es.addEventListener("done",e=>{const d=JSON.parse(e.data); const c=seatCard(d.agent);
+    c.body.textContent=d.text; c.body.classList.remove("blink"); c.tag.textContent="✓";});
+  es.addEventListener("map_start",e=>{barEl.textContent="";
+    const h=document.createElement("div"); h.className="note"; h.textContent=JSON.parse(e.data).text;
+    mapEl.appendChild(h);});
+  es.addEventListener("direct",e=>{const d=document.createElement("div"); d.className="direct";
+    d.textContent=JSON.parse(e.data).text; mapEl.appendChild(d);});
+  es.addEventListener("overview",e=>{const d=document.createElement("div"); d.className="overview";
+    d.textContent=JSON.parse(e.data).text; mapEl.appendChild(d);});
+  es.addEventListener("branch",e=>branchCard(JSON.parse(e.data)));
+  es.addEventListener("more",e=>{const d=document.createElement("div"); d.className="note";
+    d.textContent="还可深挖 · "+JSON.parse(e.data).text; mapEl.appendChild(d);});
+  es.addEventListener("map_done",()=>{$("#go").disabled=false; noteEl.textContent=""; es.close();});
+  es.addEventListener("busy",e=>{noteEl.textContent=JSON.parse(e.data).text; $("#go").disabled=false; es.close();});
+  es.addEventListener("error",e=>{let t="连接中断或出错，请重试。"; try{t=JSON.parse(e.data).text||t;}catch(_){}
+    noteEl.textContent=t; $("#go").disabled=false; es.close();});
+  es.onerror=()=>{if($("#go").disabled){$("#go").disabled=false; if(!noteEl.textContent)noteEl.textContent="连接中断，请重试。"} es.close();};
+}
+$("#go").onclick=start;
+$("#q").addEventListener("keydown",e=>{if(e.key==="Enter")start();});
+</script>
+</body>
+</html>
